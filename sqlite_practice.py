@@ -31,7 +31,7 @@ c.execute("""
 # user_phone = input("Insert your phone: ")
 # user_data = [user_name, user_email, user_phone]
 
-prueba = ["Shanks", None]
+
 
 # c.execute("""
 #         INSERT INTO usuarios (usuario, email)
