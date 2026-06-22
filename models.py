@@ -2,8 +2,12 @@
 
 #You need to import the Datatypes that you're going to use in the columns
 from sqlalchemy import Column, Integer, String
-from db_config import Base
+from database import Base
 
 class User(Base):
+    __tablename__ = "users"
+
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String)
+    username = Column(String, unique=True)
+    password = Column(String)
+    email = Column(String, unique=True)
