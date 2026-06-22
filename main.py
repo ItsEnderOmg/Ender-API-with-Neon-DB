@@ -35,9 +35,9 @@ def get_db():
 async def root():
     return {"message": "Gyaru"}
 
-# Response model hace que return muestren solo las instancias de ese objeto que coincidan con los nombres de instancia 
-# de la clase que creamos en schemas
-@app.post("/users/", response_model = schemas.UserResponse)
+# response_model hace que return muestre solo las instancias de ese objeto (de la base de datos)
+# que se llamen igual que las instancias de la clase que creamos en schemas
+@app.post("/users/create_user", response_model = schemas.UserResponse)
 # "user" sera un objeto de clase UserCreate (como lo creamos con BaseModel tiene validacion de datos)
 async def create_user(user : schemas.UserCreate ,db: Session = Depends(get_db)):
     # User es un objeto de una tabla creada en models
@@ -52,6 +52,20 @@ async def create_user(user : schemas.UserCreate ,db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
-    return new_user
 
-    
+    # Esto de aqui esta mal, lo hariamos asi si no hubieramos definido una clase para retornar valores 
+    # especificos en response_model, por eso es tan importante, para no escribir cada vez
+    # Cuales valores deberiamos devolver 
+    return {"id" : new_user.id, "username" : new_user.username, "email" : new_user.email}
+
+@app.get("/users/get_user_by_id/{id}", response_model = schemas.UserResponse)
+async def get_user(id : int, db : Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+    if user:
+        return user
+    raise HTTPException(status_code=404, details="ID doesn't exist")
+
+@app.get("/users/get_all_users")
+async def get_all_users(db : Session = Depends(get_db)):
+    result = db.query(models.User).all()
+    return result

@@ -12,6 +12,6 @@ class UserResponse(BaseModel):
     username: str
     email: str
 
-    #Esto es pa q permita leer datos desde un objeto SQLAlchemy
+    #Esto es pa q permita leer datos desde un objeto SQLAlchemy, jaja no entendi pero ponelo
     class Config:
         from_attributes = True
