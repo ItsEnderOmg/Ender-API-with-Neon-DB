@@ -1,4 +1,7 @@
+# Aqui especificas que archivos ignora git, no les da seguimiento
+# Con el / especificas q es una carpeta
 .env
 __pycache__/
-study
+.venv/
 *.pyc
+.vscode/
