@@ -15,3 +15,9 @@ class UserResponse(BaseModel):
     #Esto es pa q permita leer datos desde un objeto SQLAlchemy, jaja no entendi pero ponelo
     class Config:
         from_attributes = True
+
+# Los datos que puede actualizar el cliente, el | None = None es para que todo sea opcional, no es necesario actualizar todo
+class UserUpdate(BaseModel):
+    username : str | None = Field(defualt=None,pattern=r'[a-zA-Z0-9_]{3,20}$') 
+    password : str | None = None
+    email : EmailStr | None = None

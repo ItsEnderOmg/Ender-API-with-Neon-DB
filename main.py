@@ -82,3 +82,21 @@ async def delete_user(id : int, db : Session = Depends(get_db)):
     db.delete(user)
     db.commit()
     return {"message": f"The user with id = {id} was deleted."} 
+
+#Update a value of a user in the db (the values are optional, the client doesnt need to update everything)
+@app.patch("/users/{user_id}", response_model=schemas.UserResponse)
+async def update_user(user_id: int, new_user_data: schemas.UserUpdate, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User does not exist.")
+
+    # This converts the json (new_user_data, aka the data the client sent) to a dict, but exclude_unset=True only includes de keys with values =! None
+    data_to_update = new_user_data.model_dump(exclude_unset=True)
+
+    # Iterates the dict with the data the cllient sent and pdates the user.key with the new value/s
+    for key, value in data_to_update.items():
+        setattr (user , key, value)
+    
+    db.commit()
+    db.refresh(user)
+    return user
