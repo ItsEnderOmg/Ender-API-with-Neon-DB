@@ -1,5 +1,6 @@
 # Aqui especificas que archivos ignora git, no les da seguimiento
 # Con el / especificas q es una carpeta
+# Los espacios al definir la URL en .env importan, tiene q ser asi: URL=postgreswhateveretc
 .env
 __pycache__/
 .venv/

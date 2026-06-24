@@ -35,7 +35,7 @@ async def get_users_by_id(id : int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if user:
         return user
-    raise HTTPException(status_code=404, details="User not found.")
+    raise HTTPException(status_code=404, detail="User not found.")
 
 #Read all users
 @app.get("/users/get_all_users", response_model = list[schemas.UserResponse])
@@ -43,7 +43,7 @@ async def get_all_users(db : Session = Depends(get_db)):
     all_users = db.query(models.User).all()
     if all_users:
         return all_users
-    raise HTTPException(status_code=404, details="What?! There's nothing in the database...")
+    raise HTTPException(status_code=404, detail="What?! There's nothing in the database...")
 
 #Count how many users are in the database
 @app.get("/users/count_users")
@@ -78,7 +78,7 @@ async def create_user(user : schemas.UserCreate, db: Session = Depends(get_db)):
 async def delete_user(id : int, db : Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if not user:
-        raise HTTPException(status_code=404, details="User ID not found")
+        raise HTTPException(status_code=404, detail="User ID not found")
     db.delete(user)
     db.commit()
     return {"message": f"The user with id = {id} was deleted."} 
