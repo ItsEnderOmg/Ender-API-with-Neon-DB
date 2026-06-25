@@ -17,6 +17,7 @@ app.add_middleware(
     allow_methods=["*"],  # Permite todos los métodos (GET, POST, DELETE, etc)
     allow_headers=["*"],  # Permite todos los headers
 )
+
 #Esto es la coneccion practicamente
 def get_db(): 
     db = SessionLocal()
@@ -29,16 +30,16 @@ def get_db():
 async def root():
     return {"message": "Gyaru"}
 
-# Read User by id
-@app.get("/users/get_user_by_id/{id}", response_model = schemas.UserResponse)
+# Read User by id and only returns the values you specified in UserResponse
+@app.get("/users/{id}", response_model = schemas.UserResponse)
 async def get_users_by_id(id : int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if user:
         return user
     raise HTTPException(status_code=404, detail="User not found.")
 
-#Read all users
-@app.get("/users/get_all_users", response_model = list[schemas.UserResponse])
+#Read all users 
+@app.get("/users", response_model = list[schemas.UserResponse])
 async def get_all_users(db : Session = Depends(get_db)):
     all_users = db.query(models.User).all()
     if all_users:
@@ -46,13 +47,13 @@ async def get_all_users(db : Session = Depends(get_db)):
     raise HTTPException(status_code=404, detail="What?! There's nothing in the database...")
 
 #Count how many users are in the database
-@app.get("/users/count_users")
+@app.get("/users/count")
 async def count_users(db : Session = Depends(get_db)):
     return db.query(models.User).count()
 
 # response_model hace que return muestre solo las instancias de ese objeto (de la base de datos)
 # que se llamen igual que las instancias de la clase que creamos en schemas
-@app.post("/users/create_user", response_model = schemas.UserResponse)
+@app.post("/users", response_model = schemas.UserResponse)
 # "user" sera un objeto de clase UserCreate (como lo creamos con BaseModel tiene validacion de datos)
 async def create_user(user : schemas.UserCreate, db: Session = Depends(get_db)):
     # User es un objeto de una tabla creada en models
@@ -74,7 +75,7 @@ async def create_user(user : schemas.UserCreate, db: Session = Depends(get_db)):
     return {"id" : new_user.id, "username" : new_user.username, "email" : new_user.email}
 
 #Delete a user from the database
-@app.delete("/users/delete_user/{id}")
+@app.delete("/users/{id}")
 async def delete_user(id : int, db : Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if not user:
@@ -84,11 +85,11 @@ async def delete_user(id : int, db : Session = Depends(get_db)):
     return {"message": f"The user with id = {id} was deleted."} 
 
 #Update a value of a user in the db (the values are optional, the client doesnt need to update everything)
-@app.patch("/users/{user_id}", response_model=schemas.UserResponse)
+@app.patch("/users/{id}", response_model=schemas.UserResponse)
 async def update_user(user_id: int, new_user_data: schemas.UserUpdate, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=404, detail="User does not exist.")
+        raise HTTPException(status_code = 404, detail= f"User with id={user_id} does not exist.")
 
     # This converts the json (new_user_data, aka the data the client sent) to a dict, but exclude_unset=True only includes de keys with values =! None
     data_to_update = new_user_data.model_dump(exclude_unset=True)
@@ -100,3 +101,22 @@ async def update_user(user_id: int, new_user_data: schemas.UserUpdate, db: Sessi
     db.commit()
     db.refresh(user)
     return user
+
+# It's like the last function but you use the class UserCreate for the data the client needs to send (bc every data is needed)
+@app.put("/users/{user_id}", response_model=schemas.UserResponse)
+async def update_user(user_id: int, new_user_data: schemas.UserCreate, db: Session = Depends(get_db)):
+
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User does not exist.")
+    
+    # You have to change the data manually
+    user.username = new_user_data.username
+    user.email = new_user_data.email
+    user.password = new_user_data.password
+
+    db.commit()
+    db.refresh(user)
+    return user
+
+a = 0
