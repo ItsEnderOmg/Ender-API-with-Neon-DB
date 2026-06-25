@@ -12,7 +12,7 @@ Base.metadata.create_all(bind=engine)
 # Configurar CORS para permitir solicitudes desde cualquier origen
 app.add_middleware(
     CORSMiddleware,
-    # allow_origins=["*"],  # Permite todos los orígenes
+    allow_origins=["https://itsenderomg.github.io/Ender-API-with-Neon-DB"],  # Permite todos los orígenes
     allow_credentials=True,
     allow_methods=["*"],  # Permite todos los métodos (GET, POST, DELETE, etc)
     allow_headers=["*"],  # Permite todos los headers
@@ -104,7 +104,7 @@ async def update_user(user_id: int, new_user_data: schemas.UserUpdate, db: Sessi
 
 # It's like the last function but you use the class UserCreate for the data the client needs to send (bc every data is needed)
 @app.put("/users/{user_id}", response_model=schemas.UserResponse)
-async def update_user(user_id: int, new_user_data: schemas.UserCreate, db: Session = Depends(get_db)):
+async def update_whole_user(user_id: int, new_user_data: schemas.UserCreate, db: Session = Depends(get_db)):
 
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
@@ -118,5 +118,3 @@ async def update_user(user_id: int, new_user_data: schemas.UserCreate, db: Sessi
     db.commit()
     db.refresh(user)
     return user
-
-a = 0
