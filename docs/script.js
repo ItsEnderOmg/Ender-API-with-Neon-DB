@@ -19,17 +19,17 @@ async function loadUsers() {
     try {
         /* Hace la peticion a esta url, y await impide que continue sin tener fetch completo
         el $ es pa anidar las strings, como hacer: "http://127.0.0.1:8000/" + "/users"  */
-        const response = await fetch('${API_URL}/users') 
+        const response = await fetch(`${API_URL}/users`) 
         
         /* Manejo de errores, el ! significa no, es como decir "If the response is not ok, show this error" 
         Aqui muestras el mensaje de error tecnico, un mensaje corto para el dev especificando que salio mal (en este caso devuelves el status)*/
         if (!response.ok) {
-            throw new Error('Response not OK. HTTP ${response.status}')
+            throw new Error(`Response not OK. HTTP ${response.status}`)
         }
         
         // Convierte la respuesta a JSON y espera a q termine, y luego muestra los usuarios
         const users = await response.json()
-        showUsers(usuarios)
+        showUsers(users)
     } 
         // Si no funciono el try
         catch (error) {
@@ -105,12 +105,12 @@ async function createUser() {
 
         // Manejo de datos del gigante fetch anterior
         if (!response.ok) {
-            throw new Error('Error creating the user. HTTP ${response.status}')
+            throw new Error(`Error creating the user. HTTP ${response.status}`)
         }
 
         // Convertis la response a json, asi luego puedes acceder a sus valores por si los ocupas, o solo para ofrecer mejor UX
         const newUser = await response.json()
-        showSucces(`Usuario ${nuevoUsuario.username} creado exitosamente`)
+        showSucces(`Usuario ${newUser.username} creado exitosamente`)
         
         // Limpiar formulario (se tiene q usar .value para inputs)
         document.getElementById('username').value = ''
@@ -120,10 +120,39 @@ async function createUser() {
         /* Recargar lista para q el cliente no tenga que reiniciar manualmente el sitio web si quiere ver el usuario en la lista
         de usuarios que genera el boton. */
         loadUsers()
+
     } catch (error) {
         console.error(error)
         showError('No se pudo crear el usuario')
     }
+}
+
+// Funcion pa eliminar usuarios, toma como parametro un id de usuario
+async function deleteUser() {
+
+    const userId = document.getElementById('user-id').value
+    if (!userId) {
+        showError('Por favor, especificque un ID')
+        return
+    }
+
+    /* Luego de ver q el dato del input no este vacio hace esto (no especificas headers o body)
+    pq no envias ningun dato. */
+    try {
+        const response = await fetch(`${API_URL}/users/${userId}`, {
+            method: 'DELETE'
+        })
+        if (!response.ok) {
+            throw new Error(`Response not ok. HTTP ${response.status}`)
+        }
+        showSuccess('User deleted succesfully')
+        loadUsers()
+
+    } catch (error) {
+        console.log(error)
+        showError('An error ocurred while deleting the user')
+    }
+
 }
 
 // Función para mostrar mensajes de error
@@ -133,17 +162,17 @@ function showError(message) {
     const div = document.createElement('div')
     div.className = 'error' //For CSS propouses
     // Defines the text content for the div, it's a good alternative for .innerHTML when you only want to add text
-    div.textContent(message)
+    div.textContent = message
     // Adds it to the start o the container
     container.prepend(div)
 }
 
 // Función para mostrar mensajes de éxito (the only thing that changes with showError is the className and the name of the function)
-function showSucces(message) {
+function showSuccess(message) {
     const container = document.getElementById('usuarios-contenedor')
     const div = document.createElement('div')
-    div.className = 'succes'
-    div.textContent(message)
+    div.className = 'success'
+    div.textContent = message
     container.prepend(div)
 }
 
@@ -151,8 +180,9 @@ function showSucces(message) {
 document.addEventListener('DOMContentLoaded', function() {
     /* Con'DOMContentLoaded', JavaScript espera a q el HTML termine de cargar 
     para ejecutar lo de abajo, pero en este caso espera acciones del usuario (click) */
-    document.getElementById('cargar-btn').addEventListener('click', loadUsers())
+    document.getElementById('cargar-btn').addEventListener('click', loadUsers)
     // .addEventListener('event', function) Cuando ocurra X evento ejecuta Y funcion
-    document.getElementById('crear-btn').addEventListener('click', createUser())
+    document.getElementById('crear-btn').addEventListener('click', createUser)
+    document.getElementById('delete-btn').addEventListener('click', deleteUser)
 })
 
