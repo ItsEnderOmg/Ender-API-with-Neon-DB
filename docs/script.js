@@ -151,8 +151,8 @@ function showSucces(message) {
 document.addEventListener('DOMContentLoaded', function() {
     /* Con'DOMContentLoaded', JavaScript espera a q el HTML termine de cargar 
     para ejecutar lo de abajo, pero en este caso espera acciones del usuario (click) */
-    document.getElementById('cargar-btn').addEventListener('click', loadUsers)
+    document.getElementById('cargar-btn').addEventListener('click', loadUsers())
     // .addEventListener('event', function) Cuando ocurra X evento ejecuta Y funcion
-    document.getElementById('crear-btn').addEventListener('click', createUser)
+    document.getElementById('crear-btn').addEventListener('click', createUser())
 })
 
