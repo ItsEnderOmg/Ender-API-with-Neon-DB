@@ -86,10 +86,10 @@ async def delete_user(id : int, db : Session = Depends(get_db)):
 
 #Update a value of a user in the db (the values are optional, the client doesnt need to update everything)
 @app.patch("/users/{id}", response_model=schemas.UserResponse)
-async def update_user(user_id: int, new_user_data: schemas.UserUpdate, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+async def update_user(id: int, new_user_data: schemas.UserUpdate, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
     if not user:
-        raise HTTPException(status_code = 404, detail= f"User with id={user_id} does not exist.")
+        raise HTTPException(status_code = 404, detail= f"User with id={id} does not exist.")
 
     # This converts the json (new_user_data, aka the data the client sent) to a dict, but exclude_unset=True only includes de keys with values =! None
     data_to_update = new_user_data.model_dump(exclude_unset=True)
@@ -103,10 +103,10 @@ async def update_user(user_id: int, new_user_data: schemas.UserUpdate, db: Sessi
     return user
 
 # It's like the last function but you use the class UserCreate for the data the client needs to send (bc every data is needed)
-@app.put("/users/{user_id}", response_model=schemas.UserResponse)
-async def update_whole_user(user_id: int, new_user_data: schemas.UserCreate, db: Session = Depends(get_db)):
+@app.put("/users/{id}", response_model=schemas.UserResponse)
+async def update_whole_user(id: int, new_user_data: schemas.UserCreate, db: Session = Depends(get_db)):
 
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    user = db.query(models.User).filter(models.User.id == id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User does not exist.")
     

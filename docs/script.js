@@ -96,7 +96,9 @@ async function createUser() {
             // Convertis el objeto a JSON
             body: JSON.stringify({
                 /*Los nombres de la izquierda son los nombre de instancia de clase en UserCreate de schemas.py
-                y al mismo tiempo coincide con los nombres de columnas de la tabla q llama la API*/
+                y al mismo tiempo coincide con los nombres de columnas de la tabla q llama la API
+                
+                Mandas los 3 datos pq UserCreate en schemas.py los exige los 3.*/
                 username: username,
                 email: email,
                 password: password
@@ -110,7 +112,7 @@ async function createUser() {
 
         // Convertis la response a json, asi luego puedes acceder a sus valores por si los ocupas, o solo para ofrecer mejor UX
         const newUser = await response.json()
-        showSucces(`Usuario ${newUser.username} creado exitosamente`)
+        showSuccess(`Usuario ${newUser.username} creado exitosamente`)
         
         // Limpiar formulario (se tiene q usar .value para inputs)
         document.getElementById('username').value = ''
@@ -124,6 +126,64 @@ async function createUser() {
     } catch (error) {
         console.error(error)
         showError('No se pudo crear el usuario')
+    }
+}
+
+// Funcion para actualizar un usuario (no necesitas todos los campos pq es PATCH)
+async function updateUser() {
+    // Accedes a los valores de los input
+    const userId = document.getElementById('user-update-id').value
+    const username = document.getElementById('update-username').value
+    const password = document.getElementById('update-password').value
+    const email = document.getElementById('update-email').value
+
+    // Verificas q haya ingresado id
+    if (!userId) {
+        showError('Ingresa el id del usuario.')
+        return
+    }
+
+    /* Creas un dict dinamico donde asignas los valores de los input a las key username, password,
+    email (recuerda q las keys del json q envias tienen q coincidir con los nombres de las
+    instancia de clase userUpdate q creaste en schemas. ) */
+
+    const updateData = {}
+    if (username) updateData.username = username
+    if (password) updateData.password = password
+    if (email) updateData.email = email
+
+    // Verifica q al menos tenga una key
+    if (Object.keys(updateData).length === 0) {
+        showError('Introduce at least one value to update.')
+        return
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/users/${userId}`,{
+            method: 'PATCH',
+            headers: {
+                'Content-Type' : 'application/json'
+            },
+            /* No especificas los datos a enviar con {username: x, etc} pq solo necesitas enviar 
+            lo que el usuario ingreso, UserUpdate en schemas.py es flexible.*/ 
+            body: JSON.stringify(updateData)
+        })
+
+        if (!response.ok) {
+            throw new Error(`Error with the fetch. HTTP ${response.status}`)
+        }
+        const user = await response.json()
+        showSuccess(`The user ${user.username} was updated succesfully.`)
+
+        document.getElementById('user-update-id').value = ''
+        document.getElementById('update-username').value = ''
+        document.getElementById('update-password').value = ''
+        document.getElementById('update-email').value = ''
+
+        loadUsers()
+    } catch (error) {
+        console.error(error)
+        showError('An error ocurred updating the user.')
     }
 }
 
@@ -149,7 +209,7 @@ async function deleteUser() {
         loadUsers()
 
     } catch (error) {
-        console.log(error)
+        console.error(error)
         showError('An error ocurred while deleting the user')
     }
 
@@ -184,5 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // .addEventListener('event', function) Cuando ocurra X evento ejecuta Y funcion
     document.getElementById('crear-btn').addEventListener('click', createUser)
     document.getElementById('delete-btn').addEventListener('click', deleteUser)
+    document.getElementById('update-btn').addEventListener('click', updateUser)
 })
 

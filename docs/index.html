@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="widht=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>gyaru</title> 
     <link rel="stylesheet" href="styles.css">   
 </head>
@@ -24,8 +24,6 @@
         <div class="usuarios-lista">
             <h2>Usuarios</h2>
             <button id="cargar-btn">Cargar Usuarios</button>
-            <!-- Aqui se mostraran los usuarios en la db -->
-            <div id="usuarios-contenedor"></div>
         </div>
 
         <div class="formulario">
@@ -33,6 +31,19 @@
             <input type="number" id="user-id" placeholder="User-ID">
             <button id="delete-btn">Eliminar Usuario</button>
         </div>
+
+        <!-- Formulario para actualizar usuario -->
+        <div class="formulario">
+            <h2>Actualizar Usuario</h2>
+            <input type="number" id="user-update-id" placeholder="Id del usuario que quieres actualizar">
+            <input type="text" id="update-username" placeholder="Nuevo Username (opcional)">
+            <input type="email" id="update-email" placeholder="Nuevo Email (opcional)">
+            <input type="password" id="update-password" placeholder="Nueva Password (opcional)">
+            <button id="update-btn">Actualizar Usuario</button>
+        </div>
+
+        <!-- Aqui se mostraran los usuarios en la db -->
+        <div id="usuarios-contenedor"></div>
     </div>
 
     <script src="script.js"></script>

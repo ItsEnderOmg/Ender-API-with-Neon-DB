@@ -17,7 +17,8 @@ class UserResponse(BaseModel):
         from_attributes = True
 
 # Los datos que puede actualizar el cliente, el | None = None es para que todo sea opcional, no es necesario actualizar todo
+# Los nombres de las instancias tienen q coincidir con nombres de columnas en la database (es para setattr() )
 class UserUpdate(BaseModel):
-    username : str | None = Field(defualt=None,pattern=r'[a-zA-Z0-9_]{3,20}$') 
+    username : str | None = None 
     password : str | None = None
     email : EmailStr | None = None
