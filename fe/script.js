@@ -15,112 +15,143 @@ let juegoFavorito = 'Esto puede variar'
 
 /* Función para obtener TODOS los usuarios, async indica que la funcion puede tomar pausas en lo que se esta ejecutando
 Sin async no puedes usar await, pq fallaran */
-async function cargarUsuarios() {
+async function loadUsers() {
     try {
         /* Hace la peticion a esta url, y await impide que continue sin tener fetch completo
         el $ es pa anidar las strings, como hacer: "http://127.0.0.1:8000/" + "/users"  */
         const response = await fetch('${API_URL}/users') 
         
-        // Manejo de errores, el ! significa no, es como decir "If the response is not ok, show this error"
+        /* Manejo de errores, el ! significa no, es como decir "If the response is not ok, show this error" 
+        Aqui muestras el mensaje de error tecnico, un mensaje corto para el dev especificando que salio mal (en este caso devuelves el status)*/
         if (!response.ok) {
-            throw new Error('Error al cargar usuarios')
+            throw new Error('Response not OK. HTTP ${response.status}')
         }
         
-        const usuarios = await response.json()
-        mostrarUsuarios(usuarios)
-    } catch (error) {
-        console.error(error)
-        mostrarError('No se pudieron cargar los usuarios')
+        // Convierte la respuesta a JSON y espera a q termine, y luego muestra los usuarios
+        const users = await response.json()
+        showUsers(usuarios)
+    } 
+        // Si no funciono el try
+        catch (error) {
+        console.error(error) // Show in console the complete error for debugging
+        showError('No se pudieron cargar los usuarios') // Este es pal usuario pq modifica el html
+    
     }
 }
 
 // Función para mostrar los usuarios en la página
-function mostrarUsuarios(usuarios) {
-    const contenedor = document.getElementById('usuarios-contenedor')
-    contenedor.innerHTML = '' // Limpiar contenido anterior
+function showUsers(users) {
+    // A esa parte especifica del html le asignas el nombre 'contenedor' pa usarlo en la function
+    const container = document.getElementById('usuarios-contenedor')
+    container.innerHTML = '' // Limpiar contenido anterior
 
-    if (usuarios.length === 0) {
-        contenedor.innerHTML = '<p>No hay usuarios</p>'
-        return
+    // Si no hay users en la db, mostras msj de error en esa parte del html
+    if (users.length === 0) {
+        container.innerHTML = '<p>No hay usuarios</p>'
+        return // Todo termina aqui con el return 
     }
-
-    usuarios.forEach(usuario => {
+ 
+    /* Usuarios es un array (en este caso es una lista de dicts), forEach es una funcion q toma otra funcion como argumento */
+    users.forEach(user => {
+        /* Por cada usuario (asi es como llamaste a los elementos del array) crea un div en memoria, y a eso lo llamaras card*/
         const card = document.createElement('div')
+        /* A ese div le asignas la clase 'usuario-card' para llamarlo desde el CSS pa editar el div y lo q contiene, tmb puede ser
+        para llamarla desde otra funcion en JavaScript eso es como hacer <div class='usuario-card'></div> */
         card.className = 'usuario-card'
+
+        /* Ahora dentro del div que creaste, agregas los key,value del dict usuario (accedes a los valores haciendo usuario.key
+        y las key son los nombres de las columnas en la database*/
         card.innerHTML = `
-            <p><strong>ID:</strong> ${usuario.id}</p>
-            <p><strong>Username:</strong> ${usuario.username}</p>
-            <p><strong>Email:</strong> ${usuario.email}</p>
+            <p><strong>ID:</strong> ${user.id}</p>
+            <p><strong>Username:</strong> ${user.username}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
         `
-        contenedor.appendChild(card)
+        // Agregas la card al contenedor en el HTML, card es un 'child' pq hay muchos jaksj
+        container.appendChild(card)
     })
 }
 
 // Función para crear un usuario
-async function crearUsuario() {
+async function createUser() {
+    // Crea las variables para almacenar los valores que ingresaron en los <input> de los HTML, .value es especifico para inputs
     const username = document.getElementById('username').value
     const email = document.getElementById('email').value
     const password = document.getElementById('password').value
 
-    // Validación básica
+    // Validación básica, es como hacer if not username or not email or not password
     if (!username || !email || !password) {
-        mostrarError('Por favor completa todos los campos')
+        showError('Por favor completa todos los campos')
         return
     }
 
     try {
         const response = await fetch(`${API_URL}/users`, {
+            // Defines el metodo que usaras, el predeterminado es GET
             method: 'POST',
+            // Los headers son info extra sobre la peticion, es metadata
             headers: {
+                // Especificas el tipo de dato q le envias al servidor (siempre es json)
                 'Content-Type': 'application/json'
             },
+            // Convertis el objeto a JSON
             body: JSON.stringify({
+                /*Los nombres de la izquierda son los nombre de instancia de clase en UserCreate de schemas.py
+                y al mismo tiempo coincide con los nombres de columnas de la tabla q llama la API*/
                 username: username,
                 email: email,
                 password: password
             })
         })
 
+        // Manejo de datos del gigante fetch anterior
         if (!response.ok) {
-            throw new Error('Error al crear usuario')
+            throw new Error('Error creating the user. HTTP ${response.status}')
         }
 
-        const nuevoUsuario = await response.json()
-        mostrarExito(`Usuario ${nuevoUsuario.username} creado exitosamente`)
+        // Convertis la response a json, asi luego puedes acceder a sus valores por si los ocupas, o solo para ofrecer mejor UX
+        const newUser = await response.json()
+        showSucces(`Usuario ${nuevoUsuario.username} creado exitosamente`)
         
-        // Limpiar formulario
+        // Limpiar formulario (se tiene q usar .value para inputs)
         document.getElementById('username').value = ''
         document.getElementById('email').value = ''
         document.getElementById('password').value = ''
         
-        // Recargar lista
-        cargarUsuarios()
+        /* Recargar lista para q el cliente no tenga que reiniciar manualmente el sitio web si quiere ver el usuario en la lista
+        de usuarios que genera el boton. */
+        loadUsers()
     } catch (error) {
         console.error(error)
-        mostrarError('No se pudo crear el usuario')
+        showError('No se pudo crear el usuario')
     }
 }
 
 // Función para mostrar mensajes de error
-function mostrarError(mensaje) {
-    const contenedor = document.getElementById('usuarios-contenedor')
+function showError(message) {
+    const container = document.getElementById('usuarios-contenedor')
+    // Create the div that is going to store the error message
     const div = document.createElement('div')
-    div.className = 'error'
-    div.textContent = mensaje
-    contenedor.prepend(div)
+    div.className = 'error' //For CSS propouses
+    // Defines the text content for the div, it's a good alternative for .innerHTML when you only want to add text
+    div.textContent(message)
+    // Adds it to the start o the container
+    container.prepend(div)
 }
 
-// Función para mostrar mensajes de éxito
-function mostrarExito(mensaje) {
-    const contenedor = document.getElementById('usuarios-contenedor')
+// Función para mostrar mensajes de éxito (the only thing that changes with showError is the className and the name of the function)
+function showSucces(message) {
+    const container = document.getElementById('usuarios-contenedor')
     const div = document.createElement('div')
-    div.className = 'success'
-    div.textContent = mensaje
-    contenedor.prepend(div)
+    div.className = 'succes'
+    div.textContent(message)
+    container.prepend(div)
 }
 
-// Event listeners (cuando carga la página)
+// Event listeners (cuando carga la página) 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('cargar-btn').addEventListener('click', cargarUsuarios)
-    document.getElementById('crear-btn').addEventListener('click', crearUsuario)
+    // 'DOMContentLoaded' espera a q el HTML cargue antes de cargar esto
+    document.getElementById('cargar-btn').addEventListener('click', loadUsers)
+    // .addEventListener('event', function) Cuando ocurra X evento ejecuta Y funcion
+    document.getElementById('crear-btn').addEventListener('click', createUser)
 })
+
