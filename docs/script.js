@@ -149,7 +149,8 @@ function showSucces(message) {
 
 // Event listeners (cuando carga la página) 
 document.addEventListener('DOMContentLoaded', function() {
-    // 'DOMContentLoaded' espera a q el HTML cargue antes de cargar esto
+    /* Con'DOMContentLoaded', JavaScript espera a q el HTML termine de cargar 
+    para ejecutar lo de abajo, pero en este caso espera acciones del usuario (click) */
     document.getElementById('cargar-btn').addEventListener('click', loadUsers)
     // .addEventListener('event', function) Cuando ocurra X evento ejecuta Y funcion
     document.getElementById('crear-btn').addEventListener('click', createUser)
