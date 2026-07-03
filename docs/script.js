@@ -187,6 +187,13 @@ async function updateUser() {
     }
 }
 
+async function redefineUser() {
+    const username = document.getElementById('put-username').value
+    const username = document.getElementById('put-username').value
+    const username = document.getElementById('put-username').value
+
+}
+
 // Funcion pa eliminar usuarios, toma como parametro un id de usuario
 async function deleteUser() {
 
@@ -212,7 +219,6 @@ async function deleteUser() {
         console.error(error)
         showError('An error ocurred while deleting the user')
     }
-
 }
 
 // Función para mostrar mensajes de error
