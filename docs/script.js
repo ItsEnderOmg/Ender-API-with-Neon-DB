@@ -10,7 +10,7 @@
 
 /* Para definir constants (no puede cambiar) usa const 'SCREAMING_SNAKE_CASE'
 para definir una variable (su valor puede cambiar despues) usa 'let camelCase' */
-const API_URL = 'https://ender-api-with-neon-db.onrender.com/'
+const API_URL = 'https://ender-api-with-neon-db.onrender.com'
 let juegoFavorito = 'Esto puede variar'
 
 /* Función para obtener TODOS los usuarios, async indica que la funcion puede tomar pausas en lo que se esta ejecutando
