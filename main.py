@@ -2,7 +2,8 @@ from fastapi import FastAPI, HTTPException, Depends # Lo que usa la API
 from fastapi.middleware.cors import CORSMiddleware #N omas pa permitir ciertas solicitudes
 from database import Base, engine, SessionLocal
 from sqlalchemy.orm import Session
-import models
+from sqlalchemy.exc import IntegrityError # To raise an exception in case an user tries to register an username/email already in use
+import models # Both these are obvious
 import schemas
 
 app = FastAPI()
@@ -12,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 # Configurar CORS para permitir solicitudes desde cualquier origen
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],  # Permite todos los orígenes
+    allow_origins=['https://itsenderomg.github.io/Ender-API-with-Neon-DB/'],
     allow_credentials=True,
     allow_methods=["*"],  # Permite todos los métodos (GET, POST, DELETE, etc)
     allow_headers=["*"],  # Permite todos los headers
@@ -53,7 +54,7 @@ async def count_users(db : Session = Depends(get_db)):
 
 # response_model hace que return muestre solo las instancias de ese objeto (de la base de datos)
 # que se llamen igual que las instancias de la clase que creamos en schemas
-@app.post("/users", response_model = schemas.UserResponse)
+@app.post("/users", response_model = schemas.UserResponse, status_code=201)
 # "user" sera un objeto de clase UserCreate (como lo creamos con BaseModel tiene validacion de datos)
 async def create_user(user : schemas.UserCreate, db: Session = Depends(get_db)):
     # User es un objeto de una tabla creada en models
@@ -66,16 +67,21 @@ async def create_user(user : schemas.UserCreate, db: Session = Depends(get_db)):
     )
     # Agrega el usuario y retorna datos segun response_model 
     db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
 
+    # This is in case the user inserts an email/username already used
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail='Email or Username are already in use.')
+    db.refresh(new_user)
     # Esto de aqui esta mal, lo hariamos asi si no hubieramos definido una clase para retornar valores 
     # especificos en response_model, por eso es tan importante, para no escribir cada vez
     # Cuales valores deberiamos devolver 
     return {"id" : new_user.id, "username" : new_user.username, "email" : new_user.email}
 
 #Delete a user from the database
-@app.delete("/users/{id}")
+@app.delete("/users/{id}", status_code = 204)
 async def delete_user(id : int, db : Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if not user:
@@ -97,8 +103,11 @@ async def update_user(id: int, new_user_data: schemas.UserUpdate, db: Session = 
     # Iterates the dict with the data the cllient sent and pdates the user.key with the new value/s
     for key, value in data_to_update.items():
         setattr (user , key, value)
-    
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail='Username/Email already in use.')
     db.refresh(user)
     return user
 
@@ -115,6 +124,10 @@ async def update_whole_user(id: int, new_user_data: schemas.UserCreate, db: Sess
     user.email = new_user_data.email
     user.password = new_user_data.password
 
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail='Username/Email already in use.')
     db.refresh(user)
     return user
