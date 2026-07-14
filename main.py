@@ -9,10 +9,8 @@ import schemas
 app = FastAPI()
 
 origins = [
-        'https://itsenderomg.github.io/Ender-API-with-Neon-DB/',
-        'https://itsenderomg.github.io/Ender-API-with-Neon-DB',
-    ]
-
+        'https://itsenderomg.github.io'
+]
 # Configurar CORS para permitir solicitudes desde cualquier origen
 app.add_middleware(
     CORSMiddleware,
