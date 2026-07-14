@@ -8,16 +8,20 @@ import schemas
 
 app = FastAPI()
 
-Base.metadata.create_all(bind=engine)
+origins = [
+        'https://itsenderomg.github.io/Ender-API-with-Neon-DB/'
+    ]
 
 # Configurar CORS para permitir solicitudes desde cualquier origen
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['https://itsenderomg.github.io/Ender-API-with-Neon-DB/'],
+    allow_origins=origins, # pyright: ignore[reportArgumentType]
     allow_credentials=True,
     allow_methods=["*"],  # Permite todos los métodos (GET, POST, DELETE, etc)
-    allow_headers=["*"],  # Permite todos los headers
+    allow_headers=["*"]  # Permite todos los headers
 )
+
+Base.metadata.create_all(bind=engine)
 
 #Esto es la coneccion practicamente
 def get_db(): 

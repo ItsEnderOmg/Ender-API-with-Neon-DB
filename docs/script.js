@@ -10,8 +10,7 @@
 
 /* Para definir constants (no puede cambiar) usa const 'SCREAMING_SNAKE_CASE'
 para definir una variable (su valor puede cambiar despues) usa 'let camelCase' */
-const API_URL = 'https://ender-api-with-neon-db.onrender.com'
-let juegoFavorito = 'Esto puede variar'
+const API_URL = 'https://ender-api-with-neon-db.onrender.com';
 
 /* Función para obtener TODOS los usuarios, async indica que la funcion puede tomar pausas en lo que se esta ejecutando
 Sin async no puedes usar await, pq fallaran */
@@ -185,13 +184,6 @@ async function updateUser() {
         console.error(error)
         showError('An error ocurred updating the user.')
     }
-}
-
-async function redefineUser() {
-    const username = document.getElementById('put-username').value
-    const username = document.getElementById('put-username').value
-    const username = document.getElementById('put-username').value
-
 }
 
 // Funcion pa eliminar usuarios, toma como parametro un id de usuario
