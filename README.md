@@ -40,4 +40,4 @@ It also has errors handling.
 
 ## Ty
 
-![hehe](https://tenor.com/lEV04IteXV3.gif)
+![hehe](/docs/gifs-images/hanamaru-kindergarten-anime.gif)
